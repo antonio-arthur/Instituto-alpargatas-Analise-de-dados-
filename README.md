@@ -14,10 +14,8 @@ Repositório com análises de dados para o Instituto Alpargatas. O objetivo é o
 - [Pré-requisitos](#pré-requisitos)
 - [Instalação e execução](#instalação-e-execução)
 - [Notebooks e scripts principais](#notebooks-e-scripts-principais)
-- [Como contribuir](#como-contribuir)
-- [Boas práticas e observações](#boas-práticas-e-observações)
 - [Membros / Autores](#membros--autores)
-- [Licença](#licença)
+
 
 ## Objetivos
 
@@ -105,12 +103,6 @@ python arquivo_teste.py
 - `tabelas/` — saídas tabulares geradas pelas análises.
 
 Se algum notebook acessar bases grandes ou dados sensíveis, execute localmente e não inclua dados confidenciais no repositório.
-
-## Boas práticas e observações
-
-- Não versionar dados sensíveis ou grandes bases diretamente no repositório — use `.gitignore` e coloque apenas amostras quando necessário.
-- Documente pré-processamentos e transformações importantes dentro dos notebooks ou com arquivos `README` nas pastas.
-- Use `requirements.txt` (já presente) ou `environment.yml` para reprodutibilidade.
 
 ## Membros / Autores
 
