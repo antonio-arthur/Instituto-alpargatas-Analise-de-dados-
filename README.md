@@ -5,7 +5,7 @@
 
 ## Visão geral
 
-Repositório com análises de dados para o Instituto Alpargatas. O objetivo é organizar, tratar e analisar bases de dados institucionais para gerar indicadores, visualizações e relatórios que apoiem a tomada de decisão.
+Repositório com análises de dados para o Instituto Alpargatas. O objetivo é organizar, tratar e analisar bases de dados institucionais para gerar indicadores, visualizações e relatórios que possam apoiar tomadas de decisão.
 
 ## Sumário
 
@@ -15,7 +15,10 @@ Repositório com análises de dados para o Instituto Alpargatas. O objetivo é o
 - [Instalação e execução](#instalação-e-execução)
 - [Notebooks e scripts principais](#notebooks-e-scripts-principais)
 - [Membros / Autores](#membros--autores)
+<<<<<<< HEAD
 
+=======
+>>>>>>> 52fb7af8 (App 1.0)
 
 ## Objetivos
 
@@ -85,28 +88,27 @@ jupyter lab
 jupyter notebook
 ```
 
-Abra `nbs/` ou `indicadores.ipynb` para explorar as análises.
+Abra  `indicadores.ipynb` e `Relatorio.ipynb` para explorar as análises.
 
-5. Executar scripts Python
+5. Executar scripts 
 
-Para rodar scripts simples (ex.: `arquivo_teste.py`):
-
-```bash
-python arquivo_teste.py
-```
 
 ## Notebooks e scripts principais
 
 - `indicadores.ipynb` — notebook com análise dos indicadores principais.
+- `Relatorio.ipynb`- notebook com tratamento e exibição de dados relevantes
 - `nbs/` — notebooks de experimentação e etapas de limpeza/transformação.
 - `src/` — funções utilitárias (funções de leitura, transformação, agregação).
 - `tabelas/` — saídas tabulares geradas pelas análises.
 
+<<<<<<< HEAD
 Se algum notebook acessar bases grandes ou dados sensíveis, execute localmente e não inclua dados confidenciais no repositório.
 
+=======
+>>>>>>> 52fb7af8 (App 1.0)
 ## Membros / Autores
 
-- Antonio Arthur de Souza Cardoso
+- Antônio Arthur de Souza Cardoso
 - Felipe Emidio de Medeiros Neto
 - Ryann Pedro Minervino das Neves Felix
 - Kaylane Pereira Francelino
