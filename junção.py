@@ -124,7 +124,7 @@ st.markdown("""
 # ==============================
 # ABAS UNIFICADAS
 # ==============================
-tabs = st.tabs(["🏢 Instituto Alpargatas", "🏘 PB — Comparativo Municípios"])
+tabs = st.tabs(["🏢 Instituto Alpargatas", "🏘 PB — Comparativo Municípios", "🗺️ Mapa da PB"])
 
 # ==============================
 # TAB 1 — INSTITUTO ALPARGATAS
@@ -282,3 +282,133 @@ with tabs[1]:
             )
         else:
             st.info("Nenhum município similar encontrado dentro da faixa populacional ±10%.")
+            
+with tabs[2]:
+    st.subheader("🗺️ Mapa do IDEB — Municípios da Paraíba (Rede Pública, Fundamental)")
+
+    csv_path = Path("database/br_inep_ideb_municipio_filtrado.csv")
+    geo_path = Path("geo/pb_municipios.json")
+
+    if not csv_path.exists():
+        st.error(f"CSV não encontrado: {csv_path}")
+    elif not geo_path.exists():
+        st.error(f"GeoJSON não encontrado: {geo_path}")
+    else:
+        # ------------------ Carregar dados ------------------
+        df = pd.read_csv(csv_path)
+        df = df[(df["rede"].str.lower() == "publica") & (df["ensino"].str.lower() == "fundamental")]
+
+        # Cidades atendidas pelo projeto
+        cidades_projeto = [
+            "Alagoa Nova", "Bananeiras", "Baía da Traição", "Cabaceiras",
+            "Campina Grande", "Carpina", "Caturité", "Guarabira", "Ingá",
+            "Itatuba", "João Pessoa", "Lagoa Seca", "Mogeiro", "Montes Claros",
+            "Queimadas", "Santa Rita", "Serra Redonda"
+        ]
+
+        # Filtro de cidades
+        filtro_modo = st.radio(
+            "Exibir dados de:",
+            ["Todas as cidades", "Apenas cidades atendidas pelo projeto"],
+            index=0,
+            key="filtro_mapa"
+        )
+        if filtro_modo != "Todas as cidades":
+            df = df[df["nome"].isin(cidades_projeto)]
+
+        # Seleção de ano
+        anos = sorted(df["ano"].unique())
+        ano_sel = st.selectbox("Selecione o ano:", anos, index=len(anos)-1, key="ano_mapa")
+        df_temp = df.query("ano == @ano_sel")
+
+        # ------------------ Calcular métricas ------------------
+        df_mun = (
+            df_temp.groupby("nome")["ideb"]
+            .agg(
+                ideb_media="mean",
+                ideb_mediana="median",
+                ideb_desvio="std",
+                perc_acima5=lambda x: (x >= 5).mean() * 100,
+            )
+            .reset_index()
+            .round({"ideb_media": 3, "ideb_mediana": 3, "ideb_desvio": 3, "perc_acima5": 1})
+            .fillna({"ideb_desvio": 0})
+        )
+
+        # ------------------ Carregar GeoJSON ------------------
+        import json
+        from plotly import graph_objects as go
+
+        with open(geo_path, "r", encoding="utf-8") as f:
+            geojson_pb = json.load(f)
+
+        df_geo = pd.DataFrame({"nome": [f["properties"]["name"] for f in geojson_pb["features"]]})
+        df_map = df_geo.merge(df_mun, on="nome", how="left")
+        df_com_dado, df_sem_dado = df_map.dropna(subset=["ideb_media"]), df_map[df_map["ideb_media"].isna()]
+
+        # ------------------ Plotar mapa ------------------
+        ideb_min, ideb_max = 1.8, 6
+        fig = go.Figure()
+
+        def add_choropleth(data, z, colorscale, name, **kwargs):
+            fig.add_trace(go.Choropleth(
+                geojson=geojson_pb,
+                locations=data["nome"],
+                z=z,
+                featureidkey="properties.name",
+                colorscale=colorscale,
+                name=name,
+                **kwargs
+            ))
+
+        if not df_sem_dado.empty:
+            add_choropleth(
+                df_sem_dado, [0]*len(df_sem_dado),
+                [[0, "lightgrey"], [1, "lightgrey"]],
+                "Sem dado",
+                showscale=False,
+                hoverinfo="location"
+            )
+
+        if not df_com_dado.empty:
+            add_choropleth(
+                df_com_dado, df_com_dado["ideb_media"],
+                "YlGnBu", "Com dado",
+                zmin=ideb_min, zmax=ideb_max,
+                colorbar_title="IDEB (média)",
+                marker_line_width=0.5,
+                marker_line_color="black",
+                hovertemplate="<b>%{location}</b><br>" +
+                              "Média: %{z:.2f}<br>" +
+                              "Mediana: %{customdata[0]:.2f}<br>" +
+                              "Desvio: %{customdata[1]:.2f}<br>" +
+                              "≥5.0: %{customdata[2]:.1f}%<extra></extra>",
+                customdata=df_com_dado[["ideb_mediana", "ideb_desvio", "perc_acima5"]].values
+            )
+
+        fig.update_layout(
+            geo=dict(fitbounds="locations", visible=False),
+            height=650,
+            margin={"r": 0, "t": 40, "l": 0, "b": 0},
+            title=f"IDEB (Rede Pública - Fundamental) — {ano_sel} ({filtro_modo})",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        # ------------------ Mostrar tabela ------------------
+        st.dataframe(df_map.sort_values("ideb_media", ascending=False).reset_index(drop=True))
+
+
+
+
+
+
+
+
+
+
+
+
+
